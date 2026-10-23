@@ -141,9 +141,13 @@ class ScanTests(unittest.TestCase):
                 attrs = dict(attrs)
                 if tag == 'a':
                     target = attrs['href']
+                    if target == 'https://q5m-ai.github.io/10958/solutions.txt':
+                        return
                     if '://' in target or not (directory / target).is_file():
                         raise AssertionError(f'Invalid local report link: {target}')
-        Links().feed((directory / 'report.html').read_text())
+        report = (directory / 'report.html').read_text()
+        self.assertIn('href="https://q5m-ai.github.io/10958/solutions.txt"', report)
+        Links().feed(report)
 
 
 if __name__ == '__main__':

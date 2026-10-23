@@ -346,7 +346,10 @@ h2{{line-height:1.3}}a{{color:#1d4ed8}}table{{border-collapse:collapse;width:100
 th,td{{padding:8px 12px;text-align:right;border-bottom:1px solid #e2e8f0}}th:first-child,td:first-child{{text-align:left}}
 code{{overflow-wrap:anywhere}}pre{{overflow:auto;background:#f1f5f9;padding:14px}}.note{{border-left:4px solid #e57b35;padding-left:16px}}
 </style><main>{svg}
-<section><h2>Saved files</h2><p>{png_link}<a href="plot.svg">SVG plot</a> ·
+<section><h2>All 100,000 solutions</h2>
+<p><strong><a href="https://q5m-ai.github.io/10958/solutions.txt">Read or download the complete plain-text list →</a></strong><br>
+One line per number: an exact expression or NOT FOUND within the solver’s bounds.</p>
+<h2>Saved files</h2><p>{png_link}<a href="plot.svg">SVG plot</a> ·
 <a href="results.csv">All 100,000 results and witnesses (CSV)</a> ·
 <a href="bands_10000.csv">10,000-number bands (CSV)</a> ·
 <a href="bands_1000.csv">1,000-number bands (CSV)</a> ·
