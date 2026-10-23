@@ -1,5 +1,6 @@
 /exact
 /real
+/_site/
 __pycache__/
 *.pyc
 *.tmp

@@ -1,0 +1,52 @@
+name: Publish report to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify solver, report and all saved expressions
+        run: make test
+      - uses: actions/configure-pages@v5
+      - name: Stage only public report artifacts
+        run: |
+          mkdir _site
+          cp scan-100000/report.html _site/index.html
+          cp scan-100000/plot.png scan-100000/plot.svg _site/
+          cp scan-100000/results.csv scan-100000/bands_10000.csv _site/
+          cp scan-100000/bands_1000.csv scan-100000/not_found.csv _site/
+          cp scan-100000/metadata.json solutions.txt _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy verified static report
+        id: deployment
+        uses: actions/deploy-pages@v4
