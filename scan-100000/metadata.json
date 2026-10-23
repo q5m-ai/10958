@@ -1,0 +1,31 @@
+{
+  "created_utc": "2026-10-23T12:53:52.935868+00:00",
+  "start": 1,
+  "end": 100000,
+  "tested": 100000,
+  "found": 82167,
+  "not_found_within_bounds": 17833,
+  "not_found_rate": 0.17833,
+  "every_found_witness_independently_verified": true,
+  "reduced_numerator_denominator_limit": 9223372036854775807,
+  "intermediate_values": "rational only",
+  "not_found_is_proof_of_impossibility": false,
+  "solver_seconds": 133.932,
+  "solver_command": [
+    "./exact",
+    "--range",
+    "1",
+    "100000"
+  ],
+  "sha256": {
+    "exact.cpp": "1f2b4c708d34fd514bfec8045f0f658b6a1d899104d7623230fb43282c9a4f7f",
+    "verify.py": "199e5a7f96e63bae95a5e3b745b24fdaa3d03498f843cdba68698122d6757858",
+    "analyze_scan.py": "50351b73b20d59113deb08bd5418b570fd9baf6b9c93c79ed8128be293dabd16",
+    "raw.txt": "e4fff975431d18cbf7e678b17ab8124d07929aee50ce021fa3f4fc157316f500",
+    "results.csv": "5864580aedb70fcb3660bb176ddd0ba01387cd5520df1b0a046c9813220d9810"
+  },
+  "band_width": 10000,
+  "additional_band_width": 1000,
+  "cumulative_plot_step": 100,
+  "png_rendered": true
+}

@@ -1,0 +1,7 @@
+/exact
+/real
+__pycache__/
+*.pyc
+*.tmp
+*.log
+*.time
