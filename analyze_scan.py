@@ -64,6 +64,64 @@ def load_and_verify(path, start, end):
     return rows, seconds
 
 
+def format_expression(node, parent_precedence=0):
+    """Flatten rational sums/products, preserving digit order and power grouping."""
+    def terms(child, sign=1):
+        if isinstance(child, ast.BinOp) and isinstance(child.op, (ast.Add, ast.Sub)):
+            yield from terms(child.left, sign)
+            yield from terms(child.right, -sign if isinstance(child.op, ast.Sub) else sign)
+        elif isinstance(child, ast.UnaryOp) and isinstance(child.op, ast.USub):
+            yield from terms(child.operand, -sign)
+        else:
+            yield sign, child
+
+    def factors(child, divided=False):
+        if isinstance(child, ast.BinOp) and isinstance(child.op, (ast.Mult, ast.Div)):
+            yield from factors(child.left, divided)
+            yield from factors(child.right, not divided if isinstance(child.op, ast.Div) else divided)
+        else:
+            yield divided, child
+
+    if isinstance(node, ast.Constant) and type(node.value) is int:
+        text, precedence = str(node.value), 4
+    elif isinstance(node, ast.UnaryOp) or (isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub))):
+        parts = []
+        for sign, child in terms(node):
+            prefix = ('-' if sign < 0 else '') if not parts else (' - ' if sign < 0 else ' + ')
+            parts.append(prefix + format_expression(child))
+        text, precedence = ''.join(parts), 1
+    elif isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Mult, ast.Div)):
+        parts = []
+        for divided, child in factors(node):
+            prefix = (' / ' if divided else ' * ') if parts else ''
+            parts.append(prefix + format_expression(child, 2))
+        text, precedence = ''.join(parts), 2
+    elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Pow):
+        text = f'{format_expression(node.left, 4)}^{format_expression(node.right, 3)}'
+        precedence = 3
+    else:
+        raise ValueError(f'Unsupported expression: {ast.dump(node)}')
+    return f'({text})' if precedence < parent_precedence else text
+
+
+def solution_lines(rows):
+    """Return one equation per target; reverify every formatted witness exactly."""
+    lines = []
+    for row in rows:
+        n = row['number']
+        if row['status'] == MISSING:
+            expression = 'NOT FOUND'
+        else:
+            tree = ast.parse(row['expression'].replace('^', '**'), mode='eval')
+            expression = format_expression(tree.body)
+            if ''.join(re.findall(r'\d', expression)) != '123456789':
+                raise ValueError(f'Formatting changed digit order for {n}')
+            if evaluate(ast.parse(expression.replace('^', '**'), mode='eval')) != n:
+                raise ValueError(f'Formatting changed the value for {n}')
+        lines.append(f'{n} = {expression}\n')
+    return ''.join(lines)
+
+
 def make_bands(rows, width):
     bands = []
     for i in range(0, len(rows), width):
@@ -330,6 +388,8 @@ def main():
     assert all(b['tested'] == 10000 for b in bands)
     assert [r['number'] for r in rows[:11111] if r['status'] == MISSING] == [10958]
     assert rows[25283 - 1]['status'] == MISSING
+    solutions_path = directory.parent / 'solutions.txt'
+    solutions_path.write_text(solution_lines(rows), encoding='utf-8')
     write_csv(directory / 'results.csv', rows)
     write_csv(directory / 'bands_10000.csv', bands)
     write_csv(directory / 'bands_1000.csv', make_bands(rows, 1000))
@@ -348,6 +408,7 @@ def main():
             'exact.cpp': ROOT / 'exact.cpp',
             'verify.py': ROOT / 'verify.py', 'analyze_scan.py': Path(__file__),
             'raw.txt': directory / 'raw.txt', 'results.csv': directory / 'results.csv',
+            'solutions.txt': solutions_path,
         }.items()},
         'band_width': 10000, 'additional_band_width': 1000, 'cumulative_plot_step': 100,
     }

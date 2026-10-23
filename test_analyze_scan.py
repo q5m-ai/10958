@@ -70,6 +70,31 @@ class ScanTests(unittest.TestCase):
         self.assertEqual(sum(r['status'] == scan.FOUND for r in rows), 82167)
         self.assertEqual(rows[-1]['cumulative_not_found'], 17833)
 
+    def test_succinct_format_preserves_grouping_and_signs(self):
+        examples = ['1-(2-(3-4))', '1/(2/(3/4))', '1*(-2+3)',
+                    '(1-2)**(3-4)', '1**(2**3)', '(1**2)**3', '-(1-(2*3))']
+        for source in examples:
+            with self.subTest(source=source):
+                tree = scan.ast.parse(source, mode='eval')
+                formatted = scan.format_expression(tree.body)
+                self.assertEqual(scan.evaluate(tree), scan.evaluate(scan.ast.parse(formatted.replace('^', '**'), mode='eval')))
+        rows, _ = self.load(FIXTURE)
+        self.assertEqual(scan.solution_lines(rows),
+                         '1 = 1^(2 + 3 + 4 + 5 + 6 + 7 + 8 + 9)\n'
+                         '2 = NOT FOUND\n'
+                         '3 = 1 + 2 + 3 - 4 + 5 + 6 + 7 - 8 - 9\n')
+
+    def test_complete_plain_text_solutions(self):
+        rows, _ = scan.load_and_verify(ROOT / 'scan-100000' / 'raw.txt', 1, 100000)
+        text = (ROOT / 'solutions.txt').read_text()
+        self.assertEqual(text, scan.solution_lines(rows))
+        lines = text.splitlines()
+        self.assertEqual(len(lines), 100000)
+        self.assertEqual(sum(line.endswith(' = NOT FOUND') for line in lines), 17833)
+        self.assertEqual(lines[10957], '10958 = NOT FOUND')
+        for n, line in enumerate(lines, 1):
+            self.assertTrue(line.startswith(f'{n} = '))
+
     def test_saved_scan_is_complete_and_consistent(self):
         directory = ROOT / 'scan-100000'
         with (directory / 'results.csv').open(newline='') as stream:
@@ -98,7 +123,7 @@ class ScanTests(unittest.TestCase):
         self.assertTrue(metadata['every_found_witness_independently_verified'])
         for name in ('raw.txt', 'results.csv'):
             self.assertEqual(hashlib.sha256((directory / name).read_bytes()).hexdigest(), metadata['sha256'][name])
-        for name in ('exact.cpp', 'verify.py', 'analyze_scan.py'):
+        for name in ('exact.cpp', 'verify.py', 'analyze_scan.py', 'solutions.txt'):
             self.assertEqual(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), metadata['sha256'][name])
         with (directory / 'not_found.csv').open(newline='') as stream:
             not_found = [int(r['number']) for r in csv.DictReader(stream)]

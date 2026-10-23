@@ -7,6 +7,14 @@ This repository contains an exact rational solver, an exploratory real-power
 solver, independent verification, and a saved scan of **every integer from 1
 through 100,000**, with expressions, CSVs, an offline report, and charts.
 
+## [All 100,000 solutions — plain text](solutions.txt)
+
+**[Read/download the complete list](https://raw.githubusercontent.com/q5m-ai/10958/main/solutions.txt)**:
+one equation per line, `number = expression`, or `number = NOT FOUND`.
+The succinct equation-list format uses `*` for multiplication, `/` for division,
+and `^` for powers. Every formatted expression is independently verified exactly.
+“NOT FOUND” means not found within the solver's bounds, not proven impossible.
+
 **No exact expression for 10,958 was found. This is not an impossibility proof.**
 
 ![Not-found rates by band and cumulatively](scan-100000/plot.png)
@@ -39,6 +47,7 @@ sample estimates and no statistical confidence intervals are needed.
 
 ## Report and data
 
+- **[Plain-text solutions for 1–100,000](solutions.txt)** — one equation per line.
 - [Offline HTML report](scan-100000/report.html) — download/clone and open locally;
   GitHub's file view displays the HTML source rather than running the report.
 - [PNG chart](scan-100000/plot.png) and [SVG chart](scan-100000/plot.svg).
@@ -142,7 +151,7 @@ Run `./exact --range` without endpoints for the original 0–11,111 range.
 
 ```sh
 make scan     # rerun all 100,000 targets; replaces scan-100000/raw.txt on success
-make report   # independently verify all witnesses; regenerate report, CSVs, plots
+make report   # verify all witnesses; regenerate solutions.txt, report, CSVs, plots
 make test
 ```
 
